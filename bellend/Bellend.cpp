@@ -21,7 +21,7 @@ void Bellend::process(EthernetClient client){
             }
     }
 
-    if (!found){
+    if (!found && this->_otherwise.action){
         this->_otherwise.action(client);
     }
 }

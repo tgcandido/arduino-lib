@@ -12,15 +12,13 @@ void Bellend::process(EthernetClient client)
 {
     Header header = this->_parser.getHeader(client);
     boolean found = false;
-    Serial.print("entrou no loop");
+    
     for (int i = 0; i < this->_handlersCount; i++)
     {
         RequestHandler handler = this->_handlers[i];
         if (strcmp(handler.header.endpoint, header.endpoint) == 0 &&
             handler.header.method == header.method)
-        {
-            
-    Serial.print("encontrou");
+        {        
             found = true;
             handler.action(client);
         }
@@ -31,6 +29,8 @@ void Bellend::process(EthernetClient client)
     {
         this->_otherwise.action(client);
     }
+
+    this->_parser.freeHeader(header);
 }
 
 void Bellend::addHandler(HTTP_METHOD method, const char* endpoint, void (*action)(EthernetClient))

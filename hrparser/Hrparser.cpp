@@ -7,30 +7,44 @@
 #include "Hrparser.h"
 
 Header HttpRequestParser::getHeader(EthernetClient client){
+    char* headerStr = this->readRequestHeader(client);
+    int headerStrLen = strlen(headerStr);
     Header header;
-    String headerStr = this->readRequestHeader(client);
-    header.method = this->getMethod(headerStr);
-    header.endpoint = this->getEndpoint(headerStr);
+    
+    header.method = this->getMethod(headerStr, headerStrLen);
+    header.endpoint = this->getEndpoint(headerStr, headerStrLen);
+    
+    free(headerStr);
     return header;
 }
 
-String HttpRequestParser::getEndpoint(String headerStr){
-    String endpoint = "";
-    int startOfEndpoint = headerStr.indexOf("/");
-    int offset = 1;
-    while (headerStr[startOfEndpoint + offset] != ' ')
-    {
-        endpoint += headerStr[startOfEndpoint + offset];
-        offset++;
+char* HttpRequestParser::getEndpoint(const char* headerStr, int headerStrLen){
+    char* endpoint = (char*)malloc(ENDPOINT_SIZE);
+    int endpointOffset = 0;
+
+    char* startOfEndpoint = (char*)memchr(headerStr, '/', headerStrLen);
+    ++startOfEndpoint;
+
+    while (*startOfEndpoint != ' '){
+        endpoint[endpointOffset++] = *startOfEndpoint;
+        ++startOfEndpoint;
     }
+    
+    endpoint[endpointOffset] = '\0';
     return endpoint;
 }
 
-HTTP_METHOD HttpRequestParser::getMethod(String headerStr){
+HTTP_METHOD HttpRequestParser::getMethod(const char* headerStr, int headerStrLen){
     HTTP_METHOD method;
-    int endOfMethod = headerStr.indexOf(" ");
-    String methodStr = headerStr.substring(0, endOfMethod);
-    if (methodStr.equals("GET"))
+    char methodStr[METHOD_SIZE];
+    int methodOffset = 0;
+
+    while (headerStr[methodOffset] != ' '){
+        methodStr[methodOffset] = headerStr[methodOffset];
+        methodOffset++;
+    }
+    methodStr[methodOffset] = '\0';    
+    if (strcmp(methodStr, "GET") == 0)
     {
         method = GET;
     }
@@ -38,13 +52,16 @@ HTTP_METHOD HttpRequestParser::getMethod(String headerStr){
     return method;
 }
 
-String HttpRequestParser::readRequestHeader(EthernetClient client){
+char* HttpRequestParser::readRequestHeader(EthernetClient client){
     char c = client.read();
-    String headerStr = "";
+    char* headerStr = (char*)malloc(HEADER_SIZE);
+    int index = 0;
     while (c != -1)
     {
-        headerStr += c;
+        headerStr[index++] = c;
         c = client.read();
     }
+    headerStr[index] = '\0';
+
     return headerStr;
 }

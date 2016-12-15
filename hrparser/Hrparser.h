@@ -6,6 +6,10 @@
 #ifndef HRPARSER_H
 #define HRPARSER_H
 
+#define METHOD_SIZE 16
+#define ENDPOINT_SIZE 32
+#define HEADER_SIZE 128
+
 #include "Arduino.h"
 #include <Ethernet.h>
 
@@ -13,16 +17,16 @@ enum HTTP_METHOD { GET, POST, DELETE, PUT };
 
 struct Header_ {
   HTTP_METHOD method;
-  String endpoint;
+  const char* endpoint;
 } typedef Header;
 
 class HttpRequestParser{
     public:
     Header getHeader(EthernetClient client);
     private:
-    String readRequestHeader(EthernetClient client);
-    HTTP_METHOD getMethod(String headerStr);
-    String getEndpoint(String headerStr);
+    char* readRequestHeader(EthernetClient client);
+    HTTP_METHOD getMethod(const char* headerStr, int headerStrLen);
+    char* getEndpoint(const char* headerStr, int headerStrLen);
 };
 
 #endif

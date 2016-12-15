@@ -20,8 +20,12 @@ class Bellend{
     public:
     Bellend() : _handlersCount(0) { };
     void process(EthernetClient client);
-    void addHandler(HTTP_METHOD method, String endpoint, void (*action) (EthernetClient));
+    void addHandler(HTTP_METHOD method, const char* endpoint, void (*action) (EthernetClient));
     void otherwise(void (*action) (EthernetClient));
+    const char* startHtmlResponse();
+    const char* endHtmlResponse();
+    const char* okResponse();
+    const char* notFoundResponse();
 
     private:
     HttpRequestParser _parser;
